@@ -1,2 +1,0 @@
-a jupyter notebook explaining the concepts behind and the use of the numpy random package,
-including plots of the various distributions.
