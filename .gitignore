@@ -1,4 +1,6 @@
-/3. MNIST dataset notebook/numbers
+./3. MNIST dataset notebook/numbers
+./3. MNIST dataset notebook/data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
