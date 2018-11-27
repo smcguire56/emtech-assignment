@@ -1,92 +1,60 @@
-# Initially import all libraries and associted methods with them
-import gzip
-import numpy as np
-import matplotlib.pyplot as plt
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten  
+import numpy
 from keras.datasets import mnist
-import sklearn.preprocessing as pre
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.optimizers import Adam
+from keras.utils import np_utils
 
-# Read in the training data images and the labels
-with gzip.open('data/train-images-idx3-ubyte.gz', 'rb') as f:
-    train_img = f.read()
+# load data
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-with gzip.open('data/train-labels-idx1-ubyte.gz', 'rb') as f:
-    train_lbl = f.read()
+# The Convolutional Neural Networks expects a 4D array
+# Reshaping to format which CNN expects (batch, height, width, channels)
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 1).astype('float32')
 
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 1).astype('float32')
 
-with gzip.open('data/t10k-images-idx3-ubyte.gz', 'rb') as f:
-    test_img = f.read()
+# normalize inputs from 0-255 to 0-1
+X_train/=255
+X_test/=255
 
-with gzip.open('data/t10k-labels-idx1-ubyte.gz', 'rb') as f:
-    test_lbl = f.read()
+# one hot encoding for labels, the only output is a number between 1 and 10 
+# eg 5 : [0,0,0,0,0,1,0,0,0,0]
 
-# show that the data is currently in byte format
-print(type(train_img))
-print(type(train_lbl))
+number_of_classes = 10
+epochs = 5
+batch_size=200
 
-# First Image
-train_img[16:800]
+y_train = np_utils.to_categorical(y_train, number_of_classes)
+y_test = np_utils.to_categorical(y_test, number_of_classes)
 
-# convert from bytes to integers in big endian format.
-#src: https://www.webopedia.com/TERM/B/big_endian.html & https://stackoverflow.com/questions/846038/convert-a-python-int-into-a-big-endian-string-of-bytes
-int.from_bytes(train_img[16:800], 'big')
+# create Convolutional model
+#  http://cs231n.github.io/convolutional-networks/
 
-# input image dimensions
-img_rows, img_cols = 28, 28
-
-# Initialise a sequential keras model, sequentially adding layers.
-# src: https://keras.io/getting-started/sequential-model-guide/
-# single input, single output: sequential
 model = Sequential()
-
-# Add a hidden layer with 1000 neurons and an input layer with 784.
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=(28,28,1)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
+# first layer: 32 filters/ output channels, of size 5 x 5.  input layer expects image of structure height, width and channels
+model.add(Conv2D(32, (5, 5), input_shape=(X_train.shape[1], X_train.shape[2], 1), activation='relu'))
+# max pooling layer, reduces the over-fitting
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# another hidden layer
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.2))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
-# Add a three neuron output layer.
-# ranges from 1 to 10
-model.add(Dense(units=10, activation='softmax'))
+# last layer, 10 neorons, gives probability of the class, binary classification of specified number.
+model.add(Dense(number_of_classes, activation='softmax'))
 
+# prints layer types, the shape of output and parameters. 
 print(model.summary())
 
-# Build the graph.
-model.compile(loss='categorical_crossentropy', optimizer='Adadelta', metrics=['accuracy'])
+# compile the model
+model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
-train_img = ~np.array(list(train_img[16:])).reshape(60000, 28, 28).astype(np.uint8) / 255.0
-test_img = ~np.array(list(test_img[16:])).reshape(10000,28,28,1).astype(np.uint8) / 255.0
-train_lbl =  np.array(list(train_lbl[ 8:])).astype(np.uint8)
-test_lbl =  np.array(list(test_lbl[ 8:])).astype(np.uint8)
+# fit the model
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=batch_size)
 
-x_train = train_img.reshape(60000,28,28,1)
-y_train = keras.utils.to_categorical(train_lbl, 10)
-x_test = test_img.reshape(10000,28,28,1)
-y_test = keras.utils.to_categorical(test_lbl, 10)
+metrics = model.evaluate(X_test, y_test, verbose=0)
 
-encoder = pre.LabelBinarizer()
-encoder.fit(train_lbl)
-outputs = encoder.transform(train_lbl)
-
-print(train_lbl[0], outputs[0])
-
-for i in range(10):
-    print(i, encoder.transform([i]))
-
-model.fit(x_train, y_train,
-          batch_size=10000,
-          epochs=5,
-          verbose=1)
-
-(encoder.inverse_transform(model.predict(test_img)) == test_lbl).sum()
-
-model.predict(test_img[5:6])
-
-plt.imshow(test_img[5].reshape(28, 28), cmap='gray')
-plt.savefig('fig')
+print(metrics)
