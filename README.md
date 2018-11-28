@@ -21,6 +21,12 @@ Before you clone this repo you must install anaconda from:
 
 Make sure Jupyter Notebook is installed with Anaconda.
 
+Make sure you have the data folder in the root directory which includes MNIST data.
+
+[mnist](http://yann.lecun.com/exdb/mnist/) - MNIST Download
+
+
+
 Also if you need to install tensorflow you can do so on cmd:
 ```
 pip install tensorflow
