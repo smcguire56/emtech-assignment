@@ -1,7 +1,7 @@
 # Project 2018 Emerging Technologies
 
 
-![Anaconda](https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Anaconda_Logo.png/200px-Anaconda_Logo.png)
+![Anaconda](https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Anaconda_Logo.png/200px-Anaconda_Logo.png) ![jupyter](https://www.appliedis.com/wp-content/uploads/2017/08/Project-Jupyter-logo.png)
 
 This is my Emerging Technologies assignment, it includes python files and Jupyter Notebook files that
 can be viewed in the Jupyter Notebook found in Anaconda. 
