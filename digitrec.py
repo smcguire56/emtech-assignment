@@ -79,17 +79,6 @@ for index in range(10):
     y_pred = model.predict_classes(im2arr)
     print(y_pred)
 
-print('testing a specific image: ')
-img = Image.open('./images/3.png').convert("L")
-img = img.resize((28,28))
-im2arr = np.array(img)
-im2arr = im2arr.reshape(1,28,28,1)
-
-# Predicting the Test set results
-y_pred = model.predict_classes(im2arr)
-print(y_pred)
-
-
 def testUserImage(fileName):
     print('testing a specific image: ')
     img = Image.open('./images/' +str(fileName)+ '.png').convert("L")
@@ -102,5 +91,6 @@ def testUserImage(fileName):
 
 
 if __name__ == "__main__":
-    fileName = int(sys.argv[1])
-    testUserImage(fileName)
+    if len(sys.argv) > 1:
+        fileName = int(sys.argv[1])
+        testUserImage(fileName)
